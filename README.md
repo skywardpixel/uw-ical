@@ -1,4 +1,4 @@
-# uw-ical-chrome
+# UW iCal Chrome Extension
 
 A Chrome extension that adds a "To iCal" button to your MyUW interface. Click to get an .ics file which you can import into your calendar apps. 
 
