@@ -4,7 +4,6 @@ $(document).ready(function() {
     newLink.attr({
         href: "javascript:void(0);",
         title: "Export schedule to iCal",
-        "aria-hidden": true
     });
     newLink.on('click', function() {
         var queryUrl = "https://my.uw.edu/api/v1/schedule/current";
