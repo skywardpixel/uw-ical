@@ -4,4 +4,4 @@ A Chrome extension that adds a "To iCal" button to your MyUW interface. Click to
 
 ## Credits
 
-Credits to the developers of [ical.js](https://github.com/mozilla-comm/ical.js) and [FileSaver.js](https://github.com/eligrey/FileSaver.js).
+Credits to the developers of jQuery, [ical.js](https://github.com/mozilla-comm/ical.js) and [FileSaver.js](https://github.com/eligrey/FileSaver.js).
