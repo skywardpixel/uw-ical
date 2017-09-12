@@ -70,13 +70,100 @@ $(document).ready(function() {
         return vtimezone;
     }
 
+    function getVeventForClassMeeting(meeting, section, startDate, untilDate, timezone) {
+        var vevent = new ICAL.Component('vevent');
+        var event = new ICAL.Event(vevent);
+
+        event.summary = section.curriculum_abbr + " " + section.course_number + " " + section.section_id;
+        
+        var byDayList = getByDayList(meeting.meeting_days);
+        vevent.addPropertyWithValue('rrule', new ICAL.Recur({
+            freq: 'WEEKLY',
+            byday: byDayList,
+            until: untilDate,
+        }));
+        
+        var eventStartTime = new ICAL.Time({
+            year: startDate.year,
+            month: startDate.month,
+            day: startDate.day,
+            hour: parseInt(meeting.start_time.split(":")[0]),
+            minute: parseInt(meeting.start_time.split(":")[1]),
+            isDate: false
+        }, timezone);
+        
+        var eventEndTime = new ICAL.Time({
+            year: startDate.year,
+            month: startDate.month,
+            day: startDate.day,
+            hour: parseInt(meeting.end_time.split(":")[0]),
+            minute: parseInt(meeting.end_time.split(":")[1]),
+            isDate: false
+        }, timezone);
+
+        for (var d = 0; d < 7; d++) {
+            if (byDayList.indexOf(daysOfWeek[eventStartTime.dayOfWeek() - 1]) >= 0) {
+                break;
+            }
+            eventStartTime.adjust(1,0,0,0);
+            eventEndTime.adjust(1,0,0,0);
+        }
+
+        event.startDate = eventStartTime;
+        event.endDate = eventEndTime;
+
+        if (!meeting.building_tbd && !meeting.room_tbd) {
+            event.location = meeting.building + " " + meeting.room;
+        }
+
+        return vevent;
+    }
+
+    function getVeventForClassFinal(finalExam, section, startDate, untilDate, timezone) {
+        var vevent = new ICAL.Component('vevent');
+        var event = new ICAL.Event(vevent);
+
+        event.summary = section.curriculum_abbr + " " + section.course_number + " " + section.section_id + " Final";
+        
+        var date = finalExam.start_date.split(" ")[0].split("-");
+        var examStartTime = finalExam.start_date.split(" ")[1].split(":");
+        var examEndTime = finalExam.end_date.split(" ")[1].split(":");
+
+        var eventStartTime = new ICAL.Time({
+            year: parseInt(date[0]),
+            month: parseInt(date[1]),
+            day: parseInt(date[2]),
+            hour: parseInt(examStartTime[0]),
+            minute: parseInt(examStartTime[1]),
+            isDate: false
+        }, timezone);
+        
+        var eventEndTime = new ICAL.Time({
+            year: parseInt(date[0]),
+            month: parseInt(date[1]),
+            day: parseInt(date[2]),
+            hour: parseInt(examEndTime[0]),
+            minute: parseInt(examEndTime[1]),
+            isDate: false
+        }, timezone);
+
+        event.startDate = eventStartTime;
+        event.endDate = eventEndTime;
+
+        if (finalExam.building && finalExam.room_number) {
+            event.location = finalExam.building + " " + finalExam.room_number;
+        }
+
+        return vevent;
+    }
+
     const daysOfWeek = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
 
     var searchLinks = $(".myuw-search-links");
     var newLink = $(".myuw-search-links a:first").clone();
     newLink.attr({
         href: "javascript:void(0);",
-        title: "Export schedule to iCal",
+        title: "Export schedule as iCal",
     });
     newLink.on('click', function() {
         var queryUrl = "https://my.uw.edu/api/v1/schedule/current";
@@ -98,58 +185,15 @@ $(document).ready(function() {
                 var meetings = section.meetings;
                 for (var j = 0; j < meetings.length; j++) {
                     var meeting = meetings[j];
-                    var vevent = new ICAL.Component('vevent');
-                    var event = new ICAL.Event(vevent);
-
-                    event.summary = section.curriculum_abbr + " " + section.course_number + " " + section.section_id;
-                    
-                    if (!meeting.no_meeting && !meeting.days_tbd) {
-
-                        var byDayList = getByDayList(meeting.meeting_days);
-                        vevent.addPropertyWithValue('rrule', new ICAL.Recur({
-                            freq: 'WEEKLY',
-                            byday: byDayList,
-                            until: untilDate,
-                        }));
-                        
-                        var eventStartTime = new ICAL.Time({
-                            year: startDate.year,
-                            month: startDate.month,
-                            day: startDate.day,
-                            hour: parseInt(meeting.start_time.split(":")[0]),
-                            minute: parseInt(meeting.start_time.split(":")[1]),
-                            isDate: false
-                        }, timezone);
-                        
-                        var eventEndTime = new ICAL.Time({
-                            year: startDate.year,
-                            month: startDate.month,
-                            day: startDate.day,
-                            hour: parseInt(meeting.end_time.split(":")[0]),
-                            minute: parseInt(meeting.end_time.split(":")[1]),
-                            isDate: false
-                        }, timezone);
-
-                        for (var d = 0; d < 7; d++) {
-                            if (byDayList.indexOf(daysOfWeek[eventStartTime.dayOfWeek() - 1]) >= 0) {
-                                break;
-                            }
-                            eventStartTime.adjust(1,0,0,0);
-                            eventEndTime.adjust(1,0,0,0);
-                        }
-
-                        event.startDate = eventStartTime;
-                        event.endDate = eventEndTime;
+                    if (!meeting.no_meeting && !meeting.days_tbd && !meeting.wont_meet) {
+                        comp.addSubcomponent(getVeventForClassMeeting(meeting, section, startDate, untilDate, timezone));
                     }
-
-                    if (!meeting.building_tbd && !meeting.room_tbd) {
-                        event.location = meeting.building + " " + meeting.room;
-                    }
-
-                    comp.addSubcomponent(vevent);
+                }
+                var finalExam = section.final_exam;
+                if (finalExam && finalExam.start_date && finalExam.end_date) {
+                    comp.addSubcomponent(getVeventForClassFinal(finalExam, section, startDate, untilDate, timezone));
                 }
             }
-
             console.log("iCal info:");
             console.log(comp.toString());
             var blob = new Blob([comp], {type: "text/plain;charset=utf-8"});
@@ -161,6 +205,6 @@ $(document).ready(function() {
         class: "fa fa-calendar"
     });
     var text = newLink.children("span");
-    text.html("Export schedule to iCal");
+    text.html("Export Schedule");
     $(".myuw-search-links").prepend(newLink);
 }); 
