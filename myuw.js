@@ -7,7 +7,7 @@ $(document).ready(function() {
         "aria-hidden": true
     });
     newLink.on('click', function() {
-        var queryUrl = "https://my.uw.edu/api/v1/schedule/2017,autumn";
+        var queryUrl = "https://my.uw.edu/api/v1/schedule/current";
         $.getJSON(queryUrl, function(response) {
             console.log(response);
             var comp = new ICAL.Component(['vcalendar', [], []]);
