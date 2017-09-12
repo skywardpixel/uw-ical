@@ -1,36 +1,22 @@
 $(document).ready(function() {
 
+    const daysOfWeek = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
+
     function getByDayList(meeting_days) {
         var byDayList = [];
-        if (meeting_days.sunday) {
-            byDayList.push("SU");
-        }
-        if (meeting_days.monday) {
-            byDayList.push("MO");
-        }
-        if (meeting_days.tuesday) {
-            byDayList.push("TU");
-        }
-        if (meeting_days.wednesday) {
-            byDayList.push("WE");
-        }
-        if (meeting_days.thursday) {
-            byDayList.push("TH");
-        }
-        if (meeting_days.friday) {
-            byDayList.push("FR");
-        }
-        if (meeting_days.saturday) {
-            byDayList.push("SA");
-        }
+        if (meeting_days.sunday) byDayList.push("SU");
+        if (meeting_days.monday) byDayList.push("MO");
+        if (meeting_days.tuesday) byDayList.push("TU");
+        if (meeting_days.wednesday) byDayList.push("WE");
+        if (meeting_days.thursday) byDayList.push("TH");
+        if (meeting_days.friday) byDayList.push("FR");
+        if (meeting_days.saturday) byDayList.push("SA");
         return byDayList;
     };
 
     function getTimeZoneComponent() {
         var vtimezone = new ICAL.Component(['vtimezone', [], []]);
-        
         vtimezone.addPropertyWithValue('tzid', 'America/Los_Angeles');
-
         var standardTime = new ICAL.Component('standard');
         standardTime.addPropertyWithValue('dtstart', new ICAL.Time({
             year: 1971,
@@ -47,7 +33,6 @@ $(document).ready(function() {
             byday: '1SU',
             interval: 1
         }));
-
         var daylightTime = new ICAL.Component('daylight');
         daylightTime.addPropertyWithValue('dtstart', new ICAL.Time({
             year: 1971,
@@ -64,16 +49,14 @@ $(document).ready(function() {
             byday: '2SU',
             interval: 1
         }));
-
         vtimezone.addSubcomponent(standardTime);
         vtimezone.addSubcomponent(daylightTime);
         return vtimezone;
-    }
+    };
 
     function getVeventForClassMeeting(meeting, section, startDate, untilDate, timezone) {
         var vevent = new ICAL.Component('vevent');
         var event = new ICAL.Event(vevent);
-
         event.summary = section.curriculum_abbr + " " + section.course_number + " " + section.section_id;
         
         var byDayList = getByDayList(meeting.meeting_days);
@@ -101,10 +84,7 @@ $(document).ready(function() {
             isDate: false
         }, timezone);
 
-        for (var d = 0; d < 7; d++) {
-            if (byDayList.indexOf(daysOfWeek[eventStartTime.dayOfWeek() - 1]) >= 0) {
-                break;
-            }
+        while(byDayList.indexOf(daysOfWeek[eventStartTime.dayOfWeek() - 1]) < 0) {
             eventStartTime.adjust(1,0,0,0);
             eventEndTime.adjust(1,0,0,0);
         }
@@ -117,7 +97,7 @@ $(document).ready(function() {
         }
 
         return vevent;
-    }
+    };
 
     function getVeventForClassFinal(finalExam, section, startDate, untilDate, timezone) {
         var vevent = new ICAL.Component('vevent');
@@ -155,17 +135,9 @@ $(document).ready(function() {
         }
 
         return vevent;
-    }
+    };
 
-    const daysOfWeek = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
-
-    var searchLinks = $(".myuw-search-links");
-    var newLink = $(".myuw-search-links a:first").clone();
-    newLink.attr({
-        href: "javascript:void(0);",
-        title: "Export schedule as iCal",
-    });
-    newLink.on('click', function() {
+    function generateIcsFile() {
         var queryUrl = "https://my.uw.edu/api/v1/schedule/current";
         $.getJSON(queryUrl, function(response) {
             console.log(response);
@@ -199,7 +171,15 @@ $(document).ready(function() {
             var blob = new Blob([comp], {type: "text/plain;charset=utf-8"});
             saveAs(blob, "uwschedule.ics");
         });
+    };
+
+    var searchLinks = $(".myuw-search-links");
+    var newLink = $(".myuw-search-links a:first").clone();
+    newLink.attr({
+        href: "javascript:void(0);",
+        title: "Export schedule as iCal"
     });
+    newLink.on('click', generateIcsFile);
     var icon = newLink.children("i");   
     icon.attr({
         class: "fa fa-calendar"
@@ -207,4 +187,5 @@ $(document).ready(function() {
     var text = newLink.children("span");
     text.html("Export Schedule");
     $(".myuw-search-links").prepend(newLink);
+
 }); 
