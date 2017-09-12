@@ -3,7 +3,7 @@
 
   "name": "UW iCal",
   "description": "This extension generates an iCal version of a student's schedule.",
-  "version": "1.2",
+  "version": "1.3",
   "author": "Kyle Yan",
 
   "browser_action": {

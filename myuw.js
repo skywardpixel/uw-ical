@@ -84,6 +84,7 @@ $(document).ready(function() {
             console.log(response);
             // Setup iCal information.
             var comp = new ICAL.Component(['vcalendar', [], []]);
+            comp.addPropertyWithValue('version', '2.0');
             comp.updatePropertyWithValue('prodid', '-//UW iCal by Kyle Yan');
             var vtimezone = getTimeZoneComponent();
             comp.addSubcomponent(vtimezone);
@@ -94,7 +95,6 @@ $(document).ready(function() {
             untilDate.adjust(1,0,0,0);
             for (var i = 0; i < sections.length; i++) {
                 var section = sections[i];
-                console.log("Course " + i + ": " + section.curriculum_abbr + " " + section.course_number + " " + section.section_id);
                 var meetings = section.meetings;
                 for (var j = 0; j < meetings.length; j++) {
                     var meeting = meetings[j];
@@ -138,8 +138,6 @@ $(document).ready(function() {
                             eventEndTime.adjust(1,0,0,0);
                         }
 
-                        console.log(eventStartTime.toString() + " to " + eventEndTime.toString());
-
                         event.startDate = eventStartTime;
                         event.endDate = eventEndTime;
                     }
@@ -151,6 +149,8 @@ $(document).ready(function() {
                     comp.addSubcomponent(vevent);
                 }
             }
+
+            console.log("iCal info:");
             console.log(comp.toString());
             var blob = new Blob([comp], {type: "text/plain;charset=utf-8"});
             saveAs(blob, "uwschedule.ics");
@@ -161,6 +161,6 @@ $(document).ready(function() {
         class: "fa fa-calendar"
     });
     var text = newLink.children("span");
-    text.html("To iCal");
+    text.html("Export schedule to iCal");
     $(".myuw-search-links").prepend(newLink);
 }); 
