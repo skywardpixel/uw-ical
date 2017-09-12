@@ -1,0 +1,26 @@
+{
+  "manifest_version": 2,
+
+  "name": "UW iCal",
+  "description": "This extension generates an iCal version of a student's schedule.",
+  "version": "1.0",
+  "author": "Kyle Yan",
+
+  "browser_action": {
+    "default_icon": {
+      "128": "128.png",
+      "48": "48.png",
+      "16": "16.png"
+    },
+    "default_title": "UW iCal"
+  },
+
+  "permissions": [
+    "activeTab"
+  ],
+
+  "content_scripts": [{
+    "matches": ["https://my.uw.edu/*", "http://my.uw.edu/*"],
+    "js": ["ical.min.js", "FileSaver.min.js", "jquery-3.2.1.min.js", "myuw.js"]
+  }]
+}
