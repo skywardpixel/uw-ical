@@ -195,5 +195,4 @@ $(document).ready(function() {
     var text = newLink.children("span");
     text.html("Export Schedule");
     $(".myuw-search-links").prepend(newLink);
-
 }); 

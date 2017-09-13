@@ -3,7 +3,7 @@
 
   "name": "UW iCal",
   "description": "This extension generates an iCal version of your schedule, right in MyUW.",
-  "version": "1.4",
+  "version": "1.5",
   "author": "Kyle Yan",
 
   "browser_action": {
