@@ -1,5 +1,8 @@
 $(document).ready(function() {
 
+    const scheduleUrl = "https://my.uw.edu/api/v1/schedule/current/";
+    const profileUrl = "https://my.uw.edu/api/v1/profile/";
+
     const daysOfWeek = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
 
     function getByDayList(meeting_days) {
@@ -138,8 +141,7 @@ $(document).ready(function() {
     };
 
     function generateIcsFile() {
-        var queryUrl = "https://my.uw.edu/api/v1/schedule/current";
-        $.getJSON(queryUrl, function(response) {
+        $.getJSON(scheduleUrl, function(response) {
             console.log(response);
             // Setup iCal information.
             var comp = new ICAL.Component(['vcalendar', [], []]);
@@ -168,8 +170,14 @@ $(document).ready(function() {
             }
             console.log("iCal info:");
             console.log(comp.toString());
-            var blob = new Blob([comp], {type: "text/plain;charset=utf-8"});
-            saveAs(blob, "uwschedule.ics");
+            $.getJSON(profileUrl, function(response) {
+                var filename = "my";
+                if (response && response.uwnetid) {
+                    filename = response.uwnetid;
+                }
+                var blob = new Blob([comp], {type: "text/plain;charset=utf-8"});
+                saveAs(blob, filename + "_schedule.ics");
+            });
         });
     };
 
