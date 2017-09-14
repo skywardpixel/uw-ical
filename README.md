@@ -1,6 +1,6 @@
 # UW iCal Chrome Extension
 
-A Chrome extension that adds a "To iCal" button to your MyUW interface. Click to get an .ics file which you can import into your calendar apps. 
+A Chrome extension that adds a "Export Schedule" button to your MyUW interface. Click to get an .ics file which you can import into your calendar apps. 
 
 ## Credits
 
